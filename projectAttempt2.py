@@ -105,28 +105,28 @@ class Node:
         return fn
 
 
-class mazeBFS():
-    def __init__(self,maze):
-        self.BFS(maze)
-
-    def BFS(self,maze):
-        print("Beginning BFS")
-        node = maze.startNode
-        if(node.isGoal):
-            return node
-        frontier = []
-        frontier.append(node)
-        visited = {}
-        visited[node] = True
-        while (frontier[0]!=None):
-            currentNode = frontier.pop(0)
-            for child in currentNode.getChildren:
-                if(child.isGoal):
-                    return child
-                if (visited[child]!=True):
-                    visited[child]=True
-                    frontier.append(child)
-        return "Failed"
+# class mazeBFS():
+#     def __init__(self,maze):
+#         self.BFS(maze)
+#
+#     def BFS(self,maze):
+#         print("Beginning BFS")
+#         node = maze.startNode
+#         if(node.isGoal):
+#             return node
+#         frontier = []
+#         frontier.append(node)
+#         visited = {}
+#         visited[node] = True
+#         while (frontier[0]!=None):
+#             currentNode = frontier.pop(0)
+#             for child in currentNode.getChildren:
+#                 if(child.isGoal):
+#                     return child
+#                 if (visited[child]!=True):
+#                     visited[child]=True
+#                     frontier.append(child)
+#         return "Failed"
 
 
 
@@ -268,22 +268,74 @@ class mazeReader():
                             putIn = False
                     if(putIn): newQueue.insert(child)
                     
-    def dfsHelper(self, node, visited):
+    def dfsHelper(self, node, visited, check):
         visited[node] = [node.row, node.column]
         node.printXY()
         if(node.isGoal):
             print("\nFound goal.")
+            check = 1
             return visited
         else:
             for child in node.getChildren():
-                if child not in visited:
-                    self.dfsHelper(child,visited)
+                if (child not in visited) and (check ==0):
+                    self.dfsHelper(child,visited, check)
+
     def DFS(self):
         print("Beginning DFS")
         node = self.startNode
         visited = {}
-        return self.dfsHelper(node, visited)
-    
+        return self.dfsHelper(node, visited, 0)
+
+    def newDFS(self):
+        print("start DFS: ")
+        node = self.startNode
+        print("From:", self.startNode.row, ",", self.startNode.column, "to")
+        frontier =[node]
+        visited = [node]
+        bTPath = {}
+        while len(frontier) > 0:
+            currentNode = frontier.pop()
+            if currentNode.isGoal:
+                currentNode.printXY()
+                print("Got it!")
+                break
+            for leaf in currentNode.getChildren():
+                if leaf in visited:
+                    continue
+                visited.append(leaf)
+                frontier.append(leaf)
+                bTPath[leaf] = currentNode
+        dfsPath = []
+        dfsPath.append([self.startNode.row, self.startNode.column])
+        for i in bTPath:
+            dfsPath.append([i.row, i.column])
+        return dfsPath
+
+    def newBFS(self):
+        print("start BFS: ")
+        node = self.startNode
+        print("From:", self.startNode.row, ",", self.startNode.column, "to")
+        frontier =[node]
+        visited = [node]
+        bTPath = {}
+        while len(frontier) > 0:
+            currentNode = frontier.pop(0)
+            if currentNode.isGoal:
+                currentNode.printXY()
+                print("Got it!")
+                break
+            for leaf in currentNode.getChildren():
+                if leaf in visited:
+                    continue
+                visited.append(leaf)
+                frontier.append(leaf)
+                bTPath[leaf] = currentNode
+        bfsPath = []
+        bfsPath.append([self.startNode.row, self.startNode.column])
+        for i in bTPath:
+            bfsPath.append([i.row, i.column])
+        return bfsPath
+
     def BFS(self):
         print("Beginning BFS")
 
@@ -351,5 +403,11 @@ print(bfsPath)
 #finalTestNode.printXY()
 #print(finalTestNode.isGoal)
 
-path = maze.aStarV2()
-print (path)
+# path = maze.aStarV2()
+# print (path)
+
+newbfs = maze.newBFS()
+print(newbfs)
+
+dfsPath = maze.newDFS()
+print(dfsPath)
