@@ -1,6 +1,8 @@
 from tkinter import *
 from tkinter import ttk
 import time
+import os
+from os.path import exists
 
 from project1Current import mazeReader
 
@@ -8,7 +10,11 @@ class MazeApp:
     window = Tk()
     window.title('Maze')
     window.geometry("500x500")
-    maze = mazeReader("maze-4.txt")
+    currentMaze = "maze-1.txt"
+    mazeFile = ttk.Entry(window, width = 30)
+    mazeFile.place(x=90,y=30)
+
+    maze = mazeReader(currentMaze)
     cell_size = 30
     canvas = Canvas(window, width = cell_size*maze.mazeColumns, height = cell_size*maze.mazeRows)
     status = ttk.Label(window)
@@ -23,17 +29,41 @@ class MazeApp:
         global running
         running = True
         ttk.Button(self.window ,text="Load", command=self.create).place(x=10, y=30)
-        ttk.Button(self.window ,text="Step", command=self.step).place(x=110, y=30)
+        ttk.Button(self.window ,text="Step", command=self.step).place(x=10, y=90)
         ttk.Button(self.window, text="Start Animation", command=self.start).place(x=10, y=60)
         ttk.Button(self.window, text="Stop Animation", command=self.stop).place(x=110, y=60)
         self.status.config(text="No Maze")
         self.window.mainloop()
 
     def create(self):
+        global running
+        global index
+       # self.canvas.place(x=10, y=120)
+       # for row in range(50):
+     #      for col in range(50):
+        #        self.draw(row, col, 'black')
+
+                
+        thisDirectory = os.path.dirname(os.path.abspath(__file__))
+        newFileName =  os.path.join(thisDirectory, self.mazeFile.get())
+        if(self.mazeFile.get() != self.currentMaze and os.path.isfile(newFileName)):
+            try:
+                self.currentMaze = self.mazeFile.get()
+                self.maze = mazeReader(self.mazeFile.get())
+                self.canvas.delete("all")
+                self.canvas = Canvas(self.window, width = self.cell_size*self.maze.mazeColumns, height = self.cell_size*self.maze.mazeRows)
+                self.itemPos = dict()
+                index = False
+                running = 0
+                self.status.config(text="new Maze Loaded: " + self.mazeFile.get() )
+
+            except:
+                self.status.config(text="Invalid maze loaded")
+
         if not self.maze.maze2DArray:
             return
 
-        self.canvas.place(x=10, y=90)
+        self.canvas.place(x=10, y=120)
         for row in range(self.maze.mazeRows):
             for col in range(self.maze.mazeColumns):
                 curfield = self.maze.maze2DArray[row][col]
@@ -104,10 +134,11 @@ class MazeApp:
             col = bfsPath[index][1]
             curcell = self.itemPos[str(row)+str(col)]
             self.window.update()
-            time.sleep(1)
+            time.sleep(.5)
             self.canvas.itemconfig(curcell, fill="grey")
             index = index+1
         if(index == len(bfsPath)):
+                index = 0
                 self.status.config(text="Solution complete: exit reachable at {0},{1} in {2} moves".format(finalPath[0], finalPath[1], len(bfsPath)))
         
 
