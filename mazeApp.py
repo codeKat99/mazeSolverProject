@@ -20,14 +20,14 @@ class MazeApp:
     status = ttk.Label(window)
     status.place(x=100, y=10)
     itemPos = dict()
-    running = True
+    running = False
     index = 0
 
     def _init_(self):
         global index 
         index = 0
         global running
-        running = True
+        running = False
         ttk.Button(self.window ,text="Load", command=self.create).place(x=10, y=30)
         ttk.Button(self.window ,text="Step", command=self.step).place(x=10, y=90)
         ttk.Button(self.window, text="Start Animation", command=self.start).place(x=10, y=60)
@@ -53,8 +53,9 @@ class MazeApp:
                 self.canvas.delete("all")
                 self.canvas = Canvas(self.window, width = self.cell_size*self.maze.mazeColumns, height = self.cell_size*self.maze.mazeRows)
                 self.itemPos = dict()
-                index = False
-                running = 0
+                global index
+                index = 0
+                running = False
                 self.status.config(text="new Maze Loaded: " + self.mazeFile.get() )
 
             except:
@@ -77,6 +78,7 @@ class MazeApp:
                     color = 'green'
 
                 self.draw(row, col, color)
+        index = 0
         self.status.config(text="Maze Loaded")
     
     def stop(self):
@@ -87,18 +89,28 @@ class MazeApp:
     def step(self):
         global running
         global index
+        
         if(running == False):
             bfsPath = self.maze.aStarV2() 
+            if(len(bfsPath) > 0):
+                finalPath = bfsPath[len(bfsPath)-1]
             if ( index < len(bfsPath) ):
                 row = bfsPath[index][0]
                 col = bfsPath[index][1]
                 curcell = self.itemPos[str(row)+str(col)]
                 self.window.update()
-                time.sleep(1)
                 self.canvas.itemconfig(curcell, fill="grey")
                 index = index+1
+                if(index == len(bfsPath)):
+                    index = 0
+                    isGoal = self.maze.mazeNodes[finalPath[0], finalPath[1]].isGoal
+                    if(isGoal):
+                        self.status.config(text="Solution complete: exit reachable at {0},{1} in {2} moves".format(finalPath[0], finalPath[1], len(bfsPath)))
+                    else:
+                        self.status.config(text="Solution complete: Exit not reachable.")
         else:
             print("Cannot step while animation is running.")
+
 
  
     def draw(self, row, col, color):
@@ -134,12 +146,16 @@ class MazeApp:
             col = bfsPath[index][1]
             curcell = self.itemPos[str(row)+str(col)]
             self.window.update()
-            time.sleep(.5)
+            time.sleep(.25)
             self.canvas.itemconfig(curcell, fill="grey")
             index = index+1
         if(index == len(bfsPath)):
                 index = 0
-                self.status.config(text="Solution complete: exit reachable at {0},{1} in {2} moves".format(finalPath[0], finalPath[1], len(bfsPath)))
+                isGoal = self.maze.mazeNodes[finalPath[0], finalPath[1]].isGoal
+                if(isGoal):
+                    self.status.config(text="Solution complete: exit reachable at {0},{1} in {2} moves".format(finalPath[0], finalPath[1], len(bfsPath)))
+                else:
+                        self.status.config(text="Solution complete: Exit not reachable.")
         
 
             

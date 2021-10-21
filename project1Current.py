@@ -235,7 +235,7 @@ class mazeReader():
 # Working version. Finds the optimal path and returns it as a list of nodes
     def aStarV2(self):
         cameFrom ={}
-        print("Beginning aStar")
+        #print("Beginning aStar")
         node = self.startNode
         node.setPathCost(0) ##The start node has a path cost of zero.
         if (node.isGoal):
@@ -250,6 +250,7 @@ class mazeReader():
         pathTakenList = []
         visited = {}
         visited[node] = True
+        currentNode = None
         while (newQueue.isEmpty()==False):
             currentNode = newQueue.delete()
             if(currentNode.isGoal):
@@ -267,6 +268,8 @@ class mazeReader():
                         if(newQueue.queue[i]==child):
                             putIn = False
                     if(putIn): newQueue.insert(child)
+        for nodes in self.reconstructPath(cameFrom,currentNode):
+            pathTakenList.append([nodes.row, nodes.column])
         return pathTakenList
                     
     def dfsHelper(self, node, visited, check):
